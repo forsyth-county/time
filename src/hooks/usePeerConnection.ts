@@ -81,8 +81,8 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
           call.answer(streamRef.current);
         }
 
-        call.on("stream", () => {
-          console.log('[DEBUG] Stream established with viewer');
+        call.on("stream", (remoteStream) => {
+          console.log('[DEBUG] Stream established with viewer:', remoteStream.id);
           setStatus("streaming");
         });
 
