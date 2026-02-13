@@ -236,7 +236,7 @@ export function Broadcaster() {
             >
               <div className="call-header">
                 <div>
-                  <p className="call-title">Chromebook Call</p>
+                  <p className="call-title">Forsyth Time</p>
                   <p className="call-subtitle">
                     {remoteStream ? "On call" : "Waiting for the other person"}
                   </p>

@@ -258,7 +258,7 @@ export function Viewer() {
                 >
                   <div className="call-header">
                     <div>
-                      <p className="call-title">Chromebook Call</p>
+                      <p className="call-title">Forsyth Time</p>
                       <p className="call-subtitle">
                         {remotePeerId ? `Call ID ${remotePeerId.slice(0, 4)}…${remotePeerId.slice(-4)}` : "Connecting"}
                       </p>

@@ -53,12 +53,12 @@ export default function Home() {
           >
             <div className="flex items-center justify-center gap-3 mb-2">
               <Radio className="h-8 w-8 text-blue-400 glow-icon" />
-              <h1 className="text-3xl sm:text-4xl font-bold glow-text">
-                Forsyth FaceTime
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight glow-text">
+                Forsyth Time
               </h1>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground text-glass">
-              FaceTime-style Chromebook video calling
+              FaceTime-inspired video calling, built for school networks
             </p>
           </motion.div>
 
@@ -67,7 +67,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="glass rounded-2xl p-4 sm:p-6"
+            className="glass rounded-3xl p-4 sm:p-6"
           >
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="mb-4">
