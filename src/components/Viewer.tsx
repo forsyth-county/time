@@ -94,11 +94,11 @@ export function Viewer() {
   };
 
   const handleFullscreen = () => {
-    if (videoRef.current) {
+    if (remoteVideoRef.current) {
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else {
-        videoRef.current.requestFullscreen().catch(() => {});
+        remoteVideoRef.current.requestFullscreen().catch(() => {});
       }
     }
   };

@@ -96,11 +96,12 @@ export function Broadcaster() {
   };
 
   const handleFullscreen = () => {
-    if (videoRef.current) {
+    const target = remoteStream ? remoteVideoRef.current : localVideoRef.current;
+    if (target) {
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else {
-        videoRef.current.requestFullscreen().catch(() => {});
+        target.requestFullscreen().catch(() => {});
       }
     }
   };
