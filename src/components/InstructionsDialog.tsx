@@ -22,7 +22,7 @@ const steps = [
   {
     icon: <ArrowRight className="h-5 w-5 text-blue-400" />,
     title: "Share the ID",
-    description: "Copy the generated Peer ID or scan the QR code from your desktop browser.",
+    description: "Copy the generated ID and share it with your desktop browser.",
   },
   {
     icon: <Monitor className="h-5 w-5 text-blue-400" />,
@@ -41,7 +41,7 @@ export function InstructionsDialog() {
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>How to use LiveStream</DialogTitle>
+          <DialogTitle>How to use Forsyth Time</DialogTitle>
           <DialogDescription>
             Stream your phone camera to any desktop browser in real-time using WebRTC.
           </DialogDescription>

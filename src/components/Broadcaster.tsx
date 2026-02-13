@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePeerBroadcaster } from "@/hooks/usePeerConnection";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
@@ -27,10 +27,6 @@ import {
   Video,
   Camera,
 } from "lucide-react";
-
-const QRCodeSVG = lazy(() =>
-  import("qrcode.react").then((mod) => ({ default: mod.QRCodeSVG }))
-);
 
 export function Broadcaster() {
   const {
@@ -149,17 +145,6 @@ export function Broadcaster() {
             </div>
           </div>
 
-          {/* QR Code */}
-          <div className="mt-4 flex justify-center">
-            <div className="bg-white p-3 rounded-lg">
-              <Suspense fallback={<div className="w-32 h-32 animate-pulse bg-gray-200 rounded" />}>
-                <QRCodeSVG value={peerId} size={128} level="M" />
-              </Suspense>
-            </div>
-          </div>
-          <p className="text-xs text-center text-muted-foreground mt-2">
-            Scan from desktop to get the Peer ID
-          </p>
         </CardContent>
       </Card>
 

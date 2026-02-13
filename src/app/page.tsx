@@ -48,14 +48,14 @@ export default function Home() {
             <div className="flex items-center justify-center gap-3 mb-2">
               <Radio className="h-8 w-8 text-blue-400 glow-icon" />
               <h1 className="text-3xl sm:text-4xl font-bold glow-text">
-                LiveStream
+                Forsyth Time
               </h1>
               <div className="ml-auto absolute right-4 top-4 sm:right-8 sm:top-8">
                 <InstructionsDialog />
               </div>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Real-time phone to desktop streaming
+              Real-time chromebook to chromebook streaming
             </p>
           </motion.div>
 

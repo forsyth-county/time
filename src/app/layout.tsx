@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LiveStream – Real-time Phone to Desktop Streaming",
+  title: "Forsyth Time – Real-time Chromebook to Chromebook Streaming",
   description:
-    "Stream your phone camera to any desktop browser in real-time using WebRTC and Socket.IO signaling.",
+    "Stream your Chromebook camera to any desktop browser in real-time.",
 };
 
 export default function RootLayout({
