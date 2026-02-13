@@ -223,25 +223,37 @@ export function Broadcaster() {
                   {remoteStream ? "Live" : "Preview"}
                 </span>
               </div>
-              <video
-                ref={remoteStream ? remoteVideoRef : localVideoRef}
-                autoPlay
-                playsInline
-                muted={!remoteStream}
-                className="w-full aspect-video object-cover rounded-lg video-tile"
-                aria-label={remoteStream ? "Remote stream" : "Camera preview"}
-              />
-              {remoteStream && localStream && (
-                <div className="pip-shell">
+              {remoteStream ? (
+                <>
                   <video
-                    ref={localVideoRef}
+                    ref={remoteVideoRef}
                     autoPlay
                     playsInline
-                    muted
-                    className="pip-video"
-                    aria-label="Your camera"
+                    className="w-full aspect-video object-cover rounded-lg video-tile"
+                    aria-label="Remote stream"
                   />
-                </div>
+                  {localStream && (
+                    <div className="pip-shell">
+                      <video
+                        ref={localVideoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        className="pip-video"
+                        aria-label="Your camera"
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full aspect-video object-cover rounded-lg video-tile"
+                  aria-label="Camera preview"
+                />
               )}
 
               {/* Controls Overlay */}

@@ -181,7 +181,6 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
 
       // Handle answer from viewer
       socket.on("answer", async ({ from, answer }) => {
-        void from;
         if (pcRef.current && pcRef.current.signalingState === "have-local-offer") {
           try {
             await pcRef.current.setRemoteDescription(new RTCSessionDescription(answer));
@@ -193,7 +192,6 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
 
       // Handle ICE candidates from viewer
       socket.on("ice-candidate", async ({ from, candidate }) => {
-        void from;
         if (pcRef.current && candidate) {
           try {
             await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
@@ -404,17 +402,20 @@ export function usePeerViewer(): UsePeerViewerReturn {
 
       // Handle offer from broadcaster
       socket.on("offer", async ({ from, offer }) => {
-        void from;
-
         // Create peer connection
         pcRef.current?.close();
         const pc = new RTCPeerConnection(RTC_CONFIG);
         pcRef.current = pc;
 
         if (localStreamRef.current) {
-          localStreamRef.current.getTracks().forEach((track) => {
-            pc.addTrack(track, localStreamRef.current as MediaStream);
-          });
+          const videoTrack = localStreamRef.current.getVideoTracks()[0];
+          const audioTrack = localStreamRef.current.getAudioTracks()[0];
+          if (videoTrack) {
+            pc.addTrack(videoTrack, localStreamRef.current);
+          }
+          if (audioTrack) {
+            pc.addTrack(audioTrack, localStreamRef.current);
+          }
         }
 
         // Collect remote stream
@@ -457,7 +458,6 @@ export function usePeerViewer(): UsePeerViewerReturn {
 
       // Handle ICE candidates from broadcaster
       socket.on("ice-candidate", async ({ from, candidate }) => {
-        void from;
         if (pcRef.current && candidate) {
           try {
             await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
