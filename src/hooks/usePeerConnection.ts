@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ConnectionState } from "@/components/ConnectionStatus";
 import { generatePeerId } from "@/lib/utils";
-import { getRTCConfig, RTC_CONFIG } from "@/lib/peer";
+import { getRTCConfig, getStaticRTCConfig } from "@/lib/peer";
 import { getSocket, disconnectSocket } from "@/lib/socket";
 import type { Socket } from "socket.io-client";
 
@@ -106,7 +106,7 @@ export function usePeerCall(): UsePeerCallReturn {
       rtcConfig = await getRTCConfig();
     } catch {
       console.warn("[WebRTC] getRTCConfig() failed, using static RTC_CONFIG fallback");
-      rtcConfig = RTC_CONFIG;
+      rtcConfig = getStaticRTCConfig();
     }
 
     const pc = new RTCPeerConnection(rtcConfig);

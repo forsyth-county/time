@@ -39,6 +39,34 @@ let cachedIceServers: RTCIceServer[] | null = null;
 let cacheTimestamp = 0;
 const CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours — Metered credentials rotate
 
+type RtcMode = "auto" | "relay";
+
+const ENV_RTC_MODE = (process.env.NEXT_PUBLIC_RTC_MODE ?? "").toLowerCase();
+
+function getRtcMode(): RtcMode {
+  if (typeof window !== "undefined") {
+    const param = new URLSearchParams(window.location.search).get("rtc");
+    if (param === "relay" || param === "auto") return param;
+  }
+  if (ENV_RTC_MODE === "relay") return "relay";
+  return "auto";
+}
+
+function filterRelayIceServers(iceServers: RTCIceServer[]): RTCIceServer[] {
+  const relayOnly: RTCIceServer[] = [];
+  for (const server of iceServers) {
+    const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+    const relayUrls = urls.filter((url) => {
+      const u = String(url).toLowerCase();
+      return u.startsWith("turns:") || (u.startsWith("turn:") && u.includes("transport=tcp"));
+    });
+    if (relayUrls.length > 0) {
+      relayOnly.push({ ...server, urls: relayUrls });
+    }
+  }
+  return relayOnly;
+}
+
 /**
  * Fetch fresh TURN credentials from the Metered REST API.
  * Falls back to hardcoded credentials if the API is unreachable.
@@ -84,6 +112,13 @@ export async function fetchIceServers(): Promise<RTCIceServer[]> {
  */
 export async function getRTCConfig(): Promise<RTCConfiguration> {
   const iceServers = await fetchIceServers();
+  if (getRtcMode() === "relay") {
+    const relayOnly = filterRelayIceServers(iceServers);
+    return {
+      iceServers: relayOnly.length > 0 ? relayOnly : iceServers,
+      iceTransportPolicy: "relay",
+    };
+  }
   return { iceServers };
 }
 
@@ -91,6 +126,17 @@ export async function getRTCConfig(): Promise<RTCConfiguration> {
 export const RTC_CONFIG: RTCConfiguration = {
   iceServers: FALLBACK_ICE_SERVERS,
 };
+
+export function getStaticRTCConfig(): RTCConfiguration {
+  if (getRtcMode() === "relay") {
+    const relayOnly = filterRelayIceServers(FALLBACK_ICE_SERVERS);
+    return {
+      iceServers: relayOnly.length > 0 ? relayOnly : FALLBACK_ICE_SERVERS,
+      iceTransportPolicy: "relay",
+    };
+  }
+  return RTC_CONFIG;
+}
 
 export function validateBroadcastId(id: string): boolean {
   // Alphanumeric, 3-64 characters
