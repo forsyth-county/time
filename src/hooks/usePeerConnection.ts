@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { ConnectionState } from "@/components/ConnectionStatus";
 import { generatePeerId } from "@/lib/utils";
-import { RTC_CONFIG } from "@/lib/peer";
+import { getRTCConfig, RTC_CONFIG } from "@/lib/peer";
 import { getSocket, disconnectSocket } from "@/lib/socket";
 import type { Socket } from "socket.io-client";
 
@@ -93,16 +93,25 @@ export function usePeerCall(): UsePeerCallReturn {
   const roomIdRef = useRef<string | null>(null);
   const remotePeerIdRef = useRef<string | null>(null);
 
-  const setupPeerConnection = useCallback((remotePeerId: string) => {
+  const setupPeerConnection = useCallback(async (remotePeerId: string) => {
     console.debug("[WebRTC] setupPeerConnection called, remotePeerId:", remotePeerId);
     if (pcRef.current) {
       console.debug("[WebRTC] Closing existing PeerConnection before creating new one");
       pcRef.current.close();
     }
 
-    const pc = new RTCPeerConnection(RTC_CONFIG);
+    // Fetch fresh TURN credentials from Metered API (falls back to hardcoded if offline)
+    let rtcConfig: RTCConfiguration;
+    try {
+      rtcConfig = await getRTCConfig();
+    } catch {
+      console.warn("[WebRTC] getRTCConfig() failed, using static RTC_CONFIG fallback");
+      rtcConfig = RTC_CONFIG;
+    }
+
+    const pc = new RTCPeerConnection(rtcConfig);
     pcRef.current = pc;
-    console.debug("[WebRTC] RTCPeerConnection created with config:", JSON.stringify(RTC_CONFIG));
+    console.debug("[WebRTC] RTCPeerConnection created with", rtcConfig.iceServers?.length, "ICE servers");
 
     // Add local tracks
     if (streamRef.current) {
@@ -236,7 +245,7 @@ export function usePeerCall(): UsePeerCallReturn {
         console.debug("[StartCall] user-joined event — remote socketId:", socketId);
         setStatus("connected");
         remotePeerIdRef.current = socketId;
-        const pc = setupPeerConnection(socketId);
+        const pc = await setupPeerConnection(socketId);
 
         // Create and send offer
         try {
@@ -384,7 +393,7 @@ export function usePeerCall(): UsePeerCallReturn {
       socket.on("offer", async ({ from, offer }) => {
         console.debug("[JoinCall] Received offer from:", from, "type:", offer?.type, "SDP length:", offer?.sdp?.length);
         remotePeerIdRef.current = from;
-        const pc = setupPeerConnection(from);
+        const pc = await setupPeerConnection(from);
 
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(offer));
