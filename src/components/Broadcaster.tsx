@@ -55,16 +55,32 @@ export function Broadcaster() {
   useEffect(() => {
     const localVideo = localVideoRef.current;
     if (localVideo && localStream) {
+      console.debug("[Broadcaster] Assigning localStream to <video> — stream id:", localStream.id, "video tracks:", localStream.getVideoTracks().length, "audio tracks:", localStream.getAudioTracks().length);
+      localStream.getTracks().forEach((t) => console.debug("[Broadcaster]   local track:", t.kind, "enabled:", t.enabled, "readyState:", t.readyState));
       localVideo.srcObject = localStream;
-      localVideo.play().catch(() => {});
+      localVideo.play().then(() => {
+        console.debug("[Broadcaster] ✅ Local video play() succeeded, videoWidth:", localVideo.videoWidth, "videoHeight:", localVideo.videoHeight);
+      }).catch((err) => {
+        console.error("[Broadcaster] ❌ Local video play() failed:", err);
+      });
+    } else {
+      console.debug("[Broadcaster] localStream effect — videoRef:", !!localVideo, "stream:", !!localStream);
     }
   }, [localStream]);
 
   useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
     if (remoteVideo && remoteStream) {
+      console.debug("[Broadcaster] Assigning remoteStream to <video> — stream id:", remoteStream.id, "video tracks:", remoteStream.getVideoTracks().length, "audio tracks:", remoteStream.getAudioTracks().length);
+      remoteStream.getTracks().forEach((t) => console.debug("[Broadcaster]   remote track:", t.kind, "enabled:", t.enabled, "readyState:", t.readyState, "muted:", t.muted));
       remoteVideo.srcObject = remoteStream;
-      remoteVideo.play().catch(() => {});
+      remoteVideo.play().then(() => {
+        console.debug("[Broadcaster] ✅ Remote video play() succeeded, videoWidth:", remoteVideo.videoWidth, "videoHeight:", remoteVideo.videoHeight, "paused:", remoteVideo.paused);
+      }).catch((err) => {
+        console.error("[Broadcaster] ❌ Remote video play() failed:", err);
+      });
+    } else {
+      console.debug("[Broadcaster] remoteStream effect — videoRef:", !!remoteVideo, "stream:", !!remoteStream);
     }
   }, [remoteStream]);
 
@@ -75,6 +91,7 @@ export function Broadcaster() {
   }, [error]);
 
   useEffect(() => {
+    console.debug("[Broadcaster] Status changed:", status, "| localStream:", !!localStream, "| remoteStream:", !!remoteStream);
     if (status === "connected") {
       toast({ title: "Viewer Connected!", description: "Streaming started", variant: "success" });
     } else if (status === "disconnected") {
@@ -94,6 +111,7 @@ export function Broadcaster() {
   };
 
   const handleStartCamera = async () => {
+    console.debug("[Broadcaster] handleStartCamera — starting call with callId:", callId);
     triggerHaptic([8, 16, 8]);
     setCameraStarted(true);
     await startCall();

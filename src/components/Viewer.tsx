@@ -48,16 +48,29 @@ export function Viewer() {
   useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
     if (remoteVideo && remoteStream) {
+      console.debug("[Viewer] Assigning remoteStream to <video> — stream id:", remoteStream.id, "video tracks:", remoteStream.getVideoTracks().length, "audio tracks:", remoteStream.getAudioTracks().length);
+      remoteStream.getTracks().forEach((t) => console.debug("[Viewer]   remote track:", t.kind, "enabled:", t.enabled, "readyState:", t.readyState, "muted:", t.muted));
       remoteVideo.srcObject = remoteStream;
-      remoteVideo.play().catch(() => {});
+      remoteVideo.play().then(() => {
+        console.debug("[Viewer] ✅ Remote video play() succeeded, videoWidth:", remoteVideo.videoWidth, "videoHeight:", remoteVideo.videoHeight, "paused:", remoteVideo.paused);
+      }).catch((err) => {
+        console.error("[Viewer] ❌ Remote video play() failed:", err);
+      });
+    } else {
+      console.debug("[Viewer] remoteStream effect — videoRef:", !!remoteVideo, "stream:", !!remoteStream);
     }
   }, [remoteStream]);
 
   useEffect(() => {
     const localVideo = localVideoRef.current;
     if (localVideo && localStream) {
+      console.debug("[Viewer] Assigning localStream to <video> — stream id:", localStream.id, "video tracks:", localStream.getVideoTracks().length, "audio tracks:", localStream.getAudioTracks().length);
       localVideo.srcObject = localStream;
-      localVideo.play().catch(() => {});
+      localVideo.play().then(() => {
+        console.debug("[Viewer] ✅ Local video play() succeeded");
+      }).catch((err) => {
+        console.error("[Viewer] ❌ Local video play() failed:", err);
+      });
     }
   }, [localStream]);
 
@@ -68,6 +81,7 @@ export function Viewer() {
   }, [error]);
 
   useEffect(() => {
+    console.debug("[Viewer] Status changed:", status, "| remoteStream:", !!remoteStream, "| localStream:", !!localStream, "| isStreaming:", status === "streaming" && !!remoteStream);
     if (status === "streaming") {
       toast({ title: "Connected!", description: "Receiving live stream", variant: "success" });
     } else if (status === "disconnected") {
@@ -87,11 +101,13 @@ export function Viewer() {
       toast({ title: "Invalid ID", description: "Please enter a Peer ID", variant: "destructive" });
       return;
     }
+    console.debug("[Viewer] handleConnect — joining call with remotePeerId:", remotePeerId.trim());
     triggerHaptic([8, 16, 8]);
     await joinCall(remotePeerId.trim());
   };
 
   const handleReconnect = () => {
+    console.debug("[Viewer] handleReconnect — disconnecting then re-joining with:", remotePeerId.trim());
     triggerHaptic([6, 10, 6]);
     disconnect();
     setTimeout(() => joinCall(remotePeerId.trim()), 500);

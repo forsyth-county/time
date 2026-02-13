@@ -128,6 +128,12 @@ function setupSocket(io) {
       });
 
       // Notify existing participants
+      logger.info("[Room] Emitting user-joined to room", {
+        roomId,
+        newSocketId: socket.id,
+        newUsername: socket.data.username,
+        existingParticipants: Array.from(participants.keys()).filter((id) => id !== socket.id),
+      });
       socket.to(roomId).emit("user-joined", {
         socketId: socket.id,
         userId: socket.data.userId,
@@ -135,7 +141,14 @@ function setupSocket(io) {
       });
 
       // Send current participants list to the new joiner
-      socket.emit("room-participants", getParticipantList(roomId));
+      const participantList = getParticipantList(roomId);
+      logger.info("[Room] Sending room-participants to new joiner", {
+        socketId: socket.id,
+        roomId,
+        participantCount: participantList.length,
+        participants: participantList.map((p) => p.socketId),
+      });
+      socket.emit("room-participants", participantList);
 
       logger.info("User joined room", {
         socketId: socket.id,
@@ -176,7 +189,11 @@ function setupSocket(io) {
 
     // ─── WEBRTC SIGNALING ───
     socket.on("offer", ({ to, offer }) => {
-      if (!to || !offer || !isValidPayload(offer)) return;
+      if (!to || !offer || !isValidPayload(offer)) {
+        logger.warn("[Signaling] offer rejected — invalid payload", { from: socket.id, to, hasOffer: !!offer });
+        return;
+      }
+      logger.info("[Signaling] Relaying offer", { from: socket.id, to, offerType: offer.type, sdpLength: offer.sdp ? offer.sdp.length : 0 });
       io.to(to).emit("offer", {
         from: socket.id,
         offer,
@@ -184,7 +201,11 @@ function setupSocket(io) {
     });
 
     socket.on("answer", ({ to, answer }) => {
-      if (!to || !answer || !isValidPayload(answer)) return;
+      if (!to || !answer || !isValidPayload(answer)) {
+        logger.warn("[Signaling] answer rejected — invalid payload", { from: socket.id, to, hasAnswer: !!answer });
+        return;
+      }
+      logger.info("[Signaling] Relaying answer", { from: socket.id, to, answerType: answer.type, sdpLength: answer.sdp ? answer.sdp.length : 0 });
       io.to(to).emit("answer", {
         from: socket.id,
         answer,
@@ -192,7 +213,11 @@ function setupSocket(io) {
     });
 
     socket.on("ice-candidate", ({ to, candidate }) => {
-      if (!to || !candidate || !isValidPayload(candidate)) return;
+      if (!to || !candidate || !isValidPayload(candidate)) {
+        logger.warn("[Signaling] ice-candidate rejected — invalid payload", { from: socket.id, to, hasCandidate: !!candidate });
+        return;
+      }
+      logger.info("[Signaling] Relaying ICE candidate", { from: socket.id, to, candidateType: candidate.type || "unknown", protocol: candidate.protocol || "unknown" });
       io.to(to).emit("ice-candidate", {
         from: socket.id,
         candidate,
@@ -388,6 +413,12 @@ function leaveRoom(io, socket) {
     participants.delete(socket.id);
 
     // Notify others
+    logger.info("[Room] User leaving room", {
+      roomId,
+      socketId: socket.id,
+      username: socket.data.username,
+      remainingParticipants: participants.size,
+    });
     socket.to(roomId).emit("user-left", {
       socketId: socket.id,
       username: socket.data.username,
