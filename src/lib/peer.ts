@@ -7,7 +7,7 @@ export const PEER_CONFIG = {
   // Use custom signaling server
   host: 'forsythtime.onrender.com',
   port: 443,
-  path: '/',
+  path: '/peerjs',
   secure: true,
   debug: (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? 2 : 0,
 } as const;

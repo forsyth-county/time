@@ -1,18 +1,33 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const { ExpressPeerServer } = require("peer");
 
 const app = express();
 const server = http.createServer(app);
 
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
+// PeerJS server
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
+  path: '/',
+  cors: {
+    origin: CORS_ORIGIN,
+    methods: ["GET", "POST"],
+  },
+});
+
+// Socket.io server
 const io = new Server(server, {
   cors: {
     origin: CORS_ORIGIN,
     methods: ["GET", "POST"],
   },
 });
+
+// Mount PeerJS server
+app.use('/peerjs', peerServer);
 
 // In-memory room state: roomId -> { broadcaster: socketId, viewer: socketId }
 const rooms = new Map();
