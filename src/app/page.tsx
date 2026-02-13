@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { GridBackground } from "@/components/GridBackground";
 import { Broadcaster } from "@/components/Broadcaster";
 import { Viewer } from "@/components/Viewer";
-import { InstructionsDialog } from "@/components/InstructionsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Radio, Smartphone, Monitor } from "lucide-react";
 import { isMobileDevice } from "@/lib/utils";
@@ -50,9 +49,6 @@ export default function Home() {
               <h1 className="text-3xl sm:text-4xl font-bold glow-text">
                 Forsyth Time
               </h1>
-              <div className="ml-auto absolute right-4 top-4 sm:right-8 sm:top-8">
-                <InstructionsDialog />
-              </div>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground">
               Real-time chromebook to chromebook streaming
@@ -87,15 +83,6 @@ export default function Home() {
             </Tabs>
           </motion.div>
 
-          {/* Footer */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-center text-xs text-muted-foreground mt-6"
-          >
-            Powered by WebRTC • Peer-to-peer streaming
-          </motion.p>
         </div>
       </motion.main>
     </>
