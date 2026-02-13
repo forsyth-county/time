@@ -286,31 +286,34 @@ function setupSocket(io) {
     });
 
     // ─── WAITING ROOM MANAGEMENT (host only) ───
+    async function handleWaitingRoomAction(socket, roomId, userId, action) {
+      const room = await Room.findOne({ roomId });
+      if (!room || String(room.creator) !== String(socket.data.userId)) {
+        socket.emit("error-message", { message: "Only room creator can manage waiting room" });
+        return null;
+      }
+
+      room.waitingRoom = room.waitingRoom.filter((id) => String(id) !== String(userId));
+      await room.save();
+
+      // Notify the target user
+      const sockets = await io.fetchSockets();
+      const targetSocket = sockets.find(
+        (s) => s.data.userId && s.data.userId.toString() === userId.toString()
+      );
+      if (targetSocket) {
+        targetSocket.emit(`waiting-room-${action}`, { roomId });
+      }
+
+      socket.emit("waiting-room-updated", {
+        waitingRoom: room.waitingRoom,
+      });
+    }
+
     socket.on("approve-user", async ({ roomId, userId } = {}) => {
       if (!roomId || !userId) return;
-
       try {
-        const room = await Room.findOne({ roomId });
-        if (!room || String(room.creator) !== String(socket.data.userId)) {
-          socket.emit("error-message", { message: "Only room creator can approve users" });
-          return;
-        }
-
-        room.waitingRoom = room.waitingRoom.filter((id) => String(id) !== String(userId));
-        await room.save();
-
-        // Notify the approved user (they might be connected)
-        const sockets = await io.fetchSockets();
-        const targetSocket = sockets.find(
-          (s) => s.data.userId && s.data.userId.toString() === userId.toString()
-        );
-        if (targetSocket) {
-          targetSocket.emit("waiting-room-approved", { roomId });
-        }
-
-        socket.emit("waiting-room-updated", {
-          waitingRoom: room.waitingRoom,
-        });
+        await handleWaitingRoomAction(socket, roomId, userId, "approved");
       } catch (err) {
         logger.error("Approve user error", { error: err.message });
       }
@@ -318,29 +321,8 @@ function setupSocket(io) {
 
     socket.on("reject-user", async ({ roomId, userId } = {}) => {
       if (!roomId || !userId) return;
-
       try {
-        const room = await Room.findOne({ roomId });
-        if (!room || String(room.creator) !== String(socket.data.userId)) {
-          socket.emit("error-message", { message: "Only room creator can reject users" });
-          return;
-        }
-
-        room.waitingRoom = room.waitingRoom.filter((id) => String(id) !== String(userId));
-        await room.save();
-
-        // Notify the rejected user
-        const sockets = await io.fetchSockets();
-        const targetSocket = sockets.find(
-          (s) => s.data.userId && s.data.userId.toString() === userId.toString()
-        );
-        if (targetSocket) {
-          targetSocket.emit("waiting-room-rejected", { roomId });
-        }
-
-        socket.emit("waiting-room-updated", {
-          waitingRoom: room.waitingRoom,
-        });
+        await handleWaitingRoomAction(socket, roomId, userId, "rejected");
       } catch (err) {
         logger.error("Reject user error", { error: err.message });
       }

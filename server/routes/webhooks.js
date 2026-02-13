@@ -1,14 +1,33 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const { Webhook } = require("svix");
 const User = require("../models/User");
 const logger = require("../utils/logger");
 
 const router = express.Router();
 
+const webhookLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many webhook requests" },
+});
+
+function extractUsername(data) {
+  return (
+    data.username ||
+    (data.first_name
+      ? `${data.first_name}${data.last_name || ""}`.replace(/\s+/g, "").slice(0, 20)
+      : `user_${data.id.slice(-8)}`)
+  );
+}
+
 // POST /api/webhooks/clerk
 // Clerk sends user.created, user.updated, user.deleted events
 router.post(
   "/clerk",
+  webhookLimiter,
   express.raw({ type: "application/json" }),
   async (req, res) => {
     const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -51,11 +70,7 @@ router.post(
             ? data.email_addresses[0].email_address
             : null;
 
-        const username =
-          data.username ||
-          (data.first_name
-            ? `${data.first_name}${data.last_name || ""}`.replace(/\s+/g, "").slice(0, 20)
-            : `user_${data.id.slice(-8)}`);
+        const username = extractUsername(data);
 
         if (!email) {
           logger.warn("Clerk user.created: no email found", { clerkId: data.id });
@@ -78,11 +93,9 @@ router.post(
             ? data.email_addresses[0].email_address
             : undefined;
 
-        const username =
-          data.username ||
-          (data.first_name
-            ? `${data.first_name}${data.last_name || ""}`.replace(/\s+/g, "").slice(0, 20)
-            : undefined);
+        const username = data.username || data.first_name
+          ? extractUsername(data)
+          : undefined;
 
         const updateFields = {};
         if (email) updateFields.email = email;

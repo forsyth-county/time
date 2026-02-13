@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 export const dynamic = "force-dynamic";
 
 class SentryExampleAPIError extends Error {
@@ -11,5 +9,4 @@ class SentryExampleAPIError extends Error {
 
 export function GET() {
   throw new SentryExampleAPIError("Sentry Example API Route Error");
-  return NextResponse.json({ data: "Testing Sentry Error..." });
 }
