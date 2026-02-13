@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "LiveStream – Real-time Phone to Desktop Streaming",
   description:
-    "Stream your phone camera to any desktop browser in real-time using WebRTC and PeerJS. No backend required.",
+    "Stream your phone camera to any desktop browser in real-time using WebRTC and Socket.IO signaling.",
 };
 
 export default function RootLayout({

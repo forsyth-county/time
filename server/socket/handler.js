@@ -7,6 +7,9 @@ const logger = require("../utils/logger");
 // In-memory room state: roomId -> Map<socketId, { userId, username, muted, videoOff, handRaised, screenSharing }>
 const roomParticipants = new Map();
 
+// In-memory 1:1 broadcast registry: broadcastId -> socketId
+const broadcastRegistry = new Map();
+
 // Simple in-memory chat rate limiter: socketId -> { count, resetAt }
 const chatLimiter = new Map();
 const CHAT_RATE_LIMIT = 10; // messages per window
@@ -140,6 +143,35 @@ function setupSocket(io) {
         roomId,
         participantCount: participants.size,
       });
+    });
+
+    // ─── 1:1 BROADCAST (dashcam mode) ───
+    socket.on("create-broadcast", ({ broadcastId } = {}) => {
+      if (!broadcastId || typeof broadcastId !== "string" || broadcastId.length > 64) {
+        socket.emit("error-message", { message: "Valid broadcastId is required" });
+        return;
+      }
+      broadcastRegistry.set(broadcastId, socket.id);
+      socket.data.broadcastId = broadcastId;
+      logger.info("Broadcast created", { broadcastId, socketId: socket.id });
+      socket.emit("broadcast-created", { broadcastId });
+    });
+
+    socket.on("join-broadcast", ({ broadcastId } = {}) => {
+      if (!broadcastId || typeof broadcastId !== "string") {
+        socket.emit("error-message", { message: "Valid broadcastId is required" });
+        return;
+      }
+      const broadcasterSocketId = broadcastRegistry.get(broadcastId);
+      if (!broadcasterSocketId) {
+        socket.emit("broadcast-not-found", { broadcastId });
+        return;
+      }
+      logger.info("Viewer joining broadcast", { broadcastId, viewerSocketId: socket.id });
+      // Tell the broadcaster a viewer wants to connect and share their socketId
+      io.to(broadcasterSocketId).emit("viewer-joined", { viewerSocketId: socket.id });
+      // Tell the viewer who the broadcaster is so they can exchange signaling
+      socket.emit("broadcast-joined", { broadcasterSocketId });
     });
 
     // ─── WEBRTC SIGNALING ───
@@ -336,6 +368,11 @@ function setupSocket(io) {
     // ─── DISCONNECT ───
     socket.on("disconnect", (reason) => {
       logger.info("Socket disconnected", { socketId: socket.id, reason });
+      // Clean up broadcast registry
+      if (socket.data.broadcastId) {
+        broadcastRegistry.delete(socket.data.broadcastId);
+        logger.info("Broadcast cleaned up", { broadcastId: socket.data.broadcastId });
+      }
       leaveRoom(io, socket);
       chatLimiter.delete(socket.id);
     });

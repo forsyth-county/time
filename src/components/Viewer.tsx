@@ -91,9 +91,10 @@ export function Viewer() {
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    const pasted = e.clipboardData.getData("text");
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").trim();
     if (pasted) {
-      setRemotePeerId(pasted.trim());
+      setRemotePeerId(pasted);
     }
   };
 
