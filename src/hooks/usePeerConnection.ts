@@ -10,6 +10,58 @@ import type { Socket } from "socket.io-client";
 // Timeout (ms) for signaling connection before treating as error
 const CONNECT_TIMEOUT = 15_000;
 
+const HIGH_VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 1920 },
+  height: { ideal: 1080 },
+  frameRate: { ideal: 60, max: 60 },
+};
+
+const FALLBACK_VIDEO_CONSTRAINTS: MediaTrackConstraints = {
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+  frameRate: { ideal: 30, max: 30 },
+};
+
+const MAX_VIDEO_BITRATE = 4_000_000;
+
+const buildVideoConstraints = (
+  facingMode: "user" | "environment",
+  base: MediaTrackConstraints
+): MediaTrackConstraints => ({
+  ...base,
+  facingMode,
+});
+
+const getCameraStream = async (facingMode: "user" | "environment") => {
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: buildVideoConstraints(facingMode, HIGH_VIDEO_CONSTRAINTS),
+      audio: true,
+    });
+  } catch (err) {
+    console.warn("[DEBUG] High-quality constraints failed, falling back:", err);
+    return await navigator.mediaDevices.getUserMedia({
+      video: buildVideoConstraints(facingMode, FALLBACK_VIDEO_CONSTRAINTS),
+      audio: true,
+    });
+  }
+};
+
+const configureVideoSender = async (sender: RTCRtpSender, track: MediaStreamTrack) => {
+  const params = sender.getParameters();
+  if (!params.encodings || params.encodings.length === 0) {
+    params.encodings = [{}];
+  }
+  const frameRate = track.getSettings().frameRate;
+  params.encodings[0].maxBitrate = MAX_VIDEO_BITRATE;
+  if (frameRate) {
+    params.encodings[0].maxFramerate = Math.round(frameRate);
+  }
+  (params as RTCRtpSendParameters & { degradationPreference?: RTCDegradationPreference }).degradationPreference =
+    "maintain-framerate";
+  await sender.setParameters(params);
+};
+
 interface UsePeerBroadcasterReturn {
   peerId: string;
   status: ConnectionState;
@@ -38,10 +90,11 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
   const startCamera = useCallback(async () => {
     console.log("[DEBUG] Starting camera with facing mode:", facingMode);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      });
+      const stream = await getCameraStream(facingMode);
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.contentHint = "motion";
+      }
       streamRef.current = stream;
       setLocalStream(stream);
       setError(null);
@@ -82,9 +135,18 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
 
         // Add local tracks
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => {
-            pc.addTrack(track, streamRef.current!);
-          });
+          const activeStream = streamRef.current;
+          const videoTrack = activeStream.getVideoTracks()[0];
+          const audioTrack = activeStream.getAudioTracks()[0];
+          if (videoTrack) {
+            const sender = pc.addTrack(videoTrack, activeStream);
+            configureVideoSender(sender, videoTrack).catch((err) => {
+              console.warn("[DEBUG] Failed to apply video sender params:", err);
+            });
+          }
+          if (audioTrack) {
+            pc.addTrack(audioTrack, activeStream);
+          }
         }
 
         // ICE candidates → relay to viewer
@@ -183,10 +245,11 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: newFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      });
+      const stream = await getCameraStream(newFacing);
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.contentHint = "motion";
+      }
       streamRef.current = stream;
       setLocalStream(stream);
 
@@ -198,6 +261,9 @@ export function usePeerBroadcaster(): UsePeerBroadcasterReturn {
         senders.forEach((sender) => {
           if (sender.track?.kind === "video" && videoTrack) {
             sender.replaceTrack(videoTrack);
+            configureVideoSender(sender, videoTrack).catch((err) => {
+              console.warn("[DEBUG] Failed to reapply video sender params:", err);
+            });
           }
           if (sender.track?.kind === "audio" && audioTrack) {
             sender.replaceTrack(audioTrack);
