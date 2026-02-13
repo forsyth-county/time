@@ -1,14 +1,12 @@
 // Centralized PeerJS configuration and utilities
-// HTTPS note: WebRTC requires secure contexts (HTTPS).
+// Uses PeerJS's free cloud signaling server (0.peerjs.com)
+// WebRTC requires secure contexts (HTTPS).
 // - Vercel deploys provide HTTPS automatically
 // - For local development, use localhost or ngrok/cloudflare tunnel
 
 export const PEER_CONFIG = {
-  // Use custom signaling server
-  host: 'forsythtime.onrender.com',
-  port: 443,
-  path: '/peerjs',
-  secure: true,
+  // Use PeerJS free cloud server for signaling (default)
+  // No custom server needed — reliable and always-on
   debug: 2, // Enable all debug logs
 } as const;
 

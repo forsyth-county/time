@@ -94,7 +94,7 @@ export default function Home() {
             transition={{ delay: 0.8 }}
             className="text-center text-xs text-muted-foreground mt-6"
           >
-            Powered by WebRTC &amp; PeerJS • No server required
+            Powered by WebRTC &amp; PeerJS • Peer-to-peer, no server needed
           </motion.p>
         </div>
       </motion.main>
