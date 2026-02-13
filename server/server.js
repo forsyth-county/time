@@ -11,7 +11,6 @@ const connectDB = require("./config/db");
 const logger = require("./utils/logger");
 const authRoutes = require("./routes/auth");
 const roomRoutes = require("./routes/rooms");
-const webhookRoutes = require("./routes/webhooks");
 const { setupSocket, roomParticipants } = require("./socket/handler");
 
 const app = express();
@@ -30,9 +29,6 @@ app.use(
     credentials: true,
   })
 );
-
-// Clerk webhook route (must be before express.json to receive raw body)
-app.use("/api/webhooks", webhookRoutes);
 
 // Body parsing
 app.use(express.json({ limit: "1mb" }));

@@ -55,27 +55,6 @@ describe("User model", () => {
       expect(user.email).toBe("test@example.com");
     });
 
-    it("allows clerkId field", () => {
-      const user = new User({
-        email: "clerk@example.com",
-        username: "clerkuser",
-        clerkId: "clerk_abc123",
-      });
-      const err = user.validateSync();
-      expect(err).toBeUndefined();
-      expect(user.clerkId).toBe("clerk_abc123");
-    });
-
-    it("does not require password (for Clerk users)", () => {
-      const user = new User({
-        email: "clerk@example.com",
-        username: "clerkuser",
-        clerkId: "clerk_abc123",
-      });
-      const err = user.validateSync();
-      expect(err).toBeUndefined();
-    });
-
     it("toJSON removes password and __v", () => {
       const user = new User({
         email: "a@b.com",
