@@ -147,6 +147,13 @@ export function usePeerCall(): UsePeerCallReturn {
 
   const startCall = useCallback(async () => {
     setIsInitiator(true);
+
+    // Clean up any previous connection
+    pcRef.current?.close();
+    pcRef.current = null;
+    disconnectSocket(socketRef.current);
+    socketRef.current = null;
+
     try {
       const stream = await getCameraStream(facingMode);
       const videoTrack = stream.getVideoTracks()[0];
@@ -248,6 +255,12 @@ export function usePeerCall(): UsePeerCallReturn {
     setError(null);
     roomIdRef.current = roomId;
 
+    // Clean up any previous connection
+    pcRef.current?.close();
+    pcRef.current = null;
+    disconnectSocket(socketRef.current);
+    socketRef.current = null;
+
     try {
       const stream = await getCameraStream("user");
       const videoTrack = stream.getVideoTracks()[0];
@@ -273,14 +286,18 @@ export function usePeerCall(): UsePeerCallReturn {
       });
 
       socket.on("room-participants", (participants) => {
-        // Connect to existing participant
-        if (participants.length > 0) {
-          const existingPeer = participants[0];
-          remotePeerIdRef.current = existingPeer.socketId;
-          setupPeerConnection(existingPeer.socketId);
-          setStatus("connected");
+        // Filter out ourselves — server includes us in the list
+        const others = participants.filter(
+          (p: { socketId: string }) => p.socketId !== socket.id
+        );
+        if (others.length > 0) {
+          // There's already someone in the room; they will send us an offer
+          // via the "user-joined" event they receive. Just wait.
+          setStatus("connecting");
         } else {
-          setStatus("waiting");
+          // Nobody else here yet — room doesn't exist or peer left
+          setStatus("error");
+          setError("No one is on this call. Check the Call ID and try again.");
         }
       });
 
@@ -387,7 +404,7 @@ export function usePeerCall(): UsePeerCallReturn {
     pcRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
-    disconnectSocket();
+    disconnectSocket(socketRef.current);
     socketRef.current = null;
     setLocalStream(null);
     setRemoteStream(null);
@@ -400,7 +417,7 @@ export function usePeerCall(): UsePeerCallReturn {
     return () => {
       pcRef.current?.close();
       streamRef.current?.getTracks().forEach((track) => track.stop());
-      disconnectSocket();
+      disconnectSocket(socketRef.current);
     };
   }, []);
 
