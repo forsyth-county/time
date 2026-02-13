@@ -15,7 +15,7 @@ A modern Next.js web application that enables a mobile phone to live-stream its 
 
 ## Tech Stack
 
-- Next.js 14+ (App Router) with TypeScript
+- Next.js (App Router) with TypeScript
 - PeerJS for WebRTC signaling
 - Tailwind CSS
 - Framer Motion

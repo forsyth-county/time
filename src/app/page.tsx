@@ -11,7 +11,7 @@ import { Radio, Smartphone, Monitor } from "lucide-react";
 import { isMobileDevice } from "@/lib/utils";
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
+  const [isClientMounted, setIsClientMounted] = useState(false);
 
   const defaultTab = useMemo(() => {
     if (typeof window === "undefined") return "viewer";
@@ -20,10 +20,10 @@ export default function Home() {
 
   // Use a ref-callback to detect mount without triggering a re-render via useEffect+setState
   const mountRef = (node: HTMLElement | null) => {
-    if (node && !mounted) setMounted(true);
+    if (node && !isClientMounted) setIsClientMounted(true);
   };
 
-  if (!mounted) {
+  if (!isClientMounted) {
     // Render a hidden div just to trigger mountRef
     return <div ref={mountRef} />;
   }
