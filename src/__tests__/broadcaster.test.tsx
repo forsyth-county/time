@@ -26,7 +26,8 @@ jest.mock('@/hooks/use-toast', () => ({
 // Mock hCaptcha component
 jest.mock('@hcaptcha/react-hcaptcha', () => {
   const React = require('react');
-  return React.forwardRef((props: any, ref: any) => {
+  // eslint-disable-next-line react/display-name
+  return React.forwardRef((props: { onVerify?: (token: string) => void }, _ref: unknown) => {
     const handleClick = () => {
       if (props.onVerify) {
         props.onVerify('test-captcha-token-12345');
