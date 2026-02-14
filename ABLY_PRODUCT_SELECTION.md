@@ -106,19 +106,21 @@ User Authentication (Supabase)
 
 ---
 
-## Configuration Required
+## Configuration
 
-### Environment Variable
-```bash
-NEXT_PUBLIC_ABLY_API_KEY=your-ably-api-key-here
+### Hardcoded API Key
+The Ably API key is **hardcoded** in `src/components/ChatComponent.tsx` for production use:
+```typescript
+const apiKey = "pnOXuA.eA-Lwg:2_EVRGu8j2HGFlHlvbxi48LSWM5JI920L8RaWX_0bHE";
 ```
 
+This follows the same pattern as Supabase credentials which are also hardcoded for static export compatibility.
+
+### No Environment Variable Needed
+~~`NEXT_PUBLIC_ABLY_API_KEY=your-ably-api-key-here`~~ (Not needed - API key is hardcoded)
+
 ### Ably Dashboard Setup
-1. Create an Ably account at [ably.com](https://ably.com)
-2. Create a new app in the Ably dashboard
-3. Select **Ably Chat** when asked which product to use
-4. Copy the API key from the dashboard
-5. Add the API key to `.env.local`
+The API key is already configured and hardcoded in the application. No additional setup is required for the Ably integration to work.
 
 ---
 

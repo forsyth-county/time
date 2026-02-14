@@ -46,11 +46,8 @@ export function ChatComponent() {
   useEffect(() => {
     if (!isLoaded || !user) return;
 
-    const apiKey = process.env.NEXT_PUBLIC_ABLY_API_KEY;
-    if (!apiKey || apiKey === "your-ably-api-key-here") {
-      console.warn("Ably API key not configured");
-      return;
-    }
+    // Hardcoded Ably API key
+    const apiKey = "pnOXuA.eA-Lwg:2_EVRGu8j2HGFlHlvbxi48LSWM5JI920L8RaWX_0bHE";
 
     const initChat = async () => {
       try {

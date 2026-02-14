@@ -146,17 +146,29 @@ All requirements from the problem statement have been successfully implemented w
 ## 🔐 Credentials & Configuration
 
 ### Hardcoded Credentials (Per User Request)
-**Location**: `src/lib/supabase.ts`
+
+**Supabase** - Location: `src/lib/supabase.ts`
 ```typescript
 const supabaseUrl = "https://mvnuqandwrnrfhossjdc.supabase.co";
 const supabaseKey = "sb_publishable_4fhIXnpB06zOzkGrcoijdg_N8fOGUy9";
 ```
 
+**Ably** - Location: `src/components/ChatComponent.tsx`
+```typescript
+const apiKey = "pnOXuA.eA-Lwg:2_EVRGu8j2HGFlHlvbxi48LSWM5JI920L8RaWX_0bHE";
+```
+
 ### Environment Variables Still Required
 ```bash
-NEXT_PUBLIC_ABLY_API_KEY=your-ably-api-key
 NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 NEXT_PUBLIC_HCAPTCHA_SITE_KEY=e88ae612-2144-47f6-beb2-25927afc0d0c
+```
+
+### Environment Variables No Longer Needed (Hardcoded)
+```bash
+# NEXT_PUBLIC_ABLY_API_KEY - Hardcoded in src/components/ChatComponent.tsx
+# NEXT_PUBLIC_SUPABASE_URL - Hardcoded in src/lib/supabase.ts
+# NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY - Hardcoded in src/lib/supabase.ts
 ```
 
 ### Supabase Database URL (Optional)

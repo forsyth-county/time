@@ -106,11 +106,11 @@ The application uses Next.js static export (`output: "export"`) which means:
 ## Configuration
 
 ### Environment Variables
-The following are configured in `.env.local` (though Supabase is hardcoded):
+The following are configured in `.env.local`:
 
 ```bash
-# Ably Real-time Chat
-NEXT_PUBLIC_ABLY_API_KEY=your-ably-api-key-here
+# Ably Real-time Chat (hardcoded in src/components/ChatComponent.tsx)
+# NEXT_PUBLIC_ABLY_API_KEY=pnOXuA.eA-Lwg:2_EVRGu8j2HGFlHlvbxi48LSWM5JI920L8RaWX_0bHE
 
 # Socket.IO signaling (for WebRTC)
 NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
@@ -132,9 +132,11 @@ See `supabase/README.md` for complete setup instructions:
 5. Credentials are hardcoded in the app
 
 ### Ably Setup
-1. Create account at [ably.com](https://ably.com)
-2. Get API key from dashboard
-3. Add to `.env.local` as `NEXT_PUBLIC_ABLY_API_KEY`
+The Ably API key is **hardcoded** in `src/components/ChatComponent.tsx`:
+```typescript
+const apiKey = "pnOXuA.eA-Lwg:2_EVRGu8j2HGFlHlvbxi48LSWM5JI920L8RaWX_0bHE";
+```
+No additional setup is required.
 
 ## File Structure
 
