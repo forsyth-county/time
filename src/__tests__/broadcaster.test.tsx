@@ -43,8 +43,8 @@ jest.mock('@hcaptcha/react-hcaptcha', () => {
 describe('Broadcaster Component with hCaptcha', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Set the environment variable
-    process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY = 'e88ae612-2144-47f6-beb2-25927afc0d0c';
+    // Set the environment variable with a test key
+    process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY = '10000000-ffff-ffff-ffff-000000000001';
   });
 
   it('should render the broadcaster with hCaptcha', () => {

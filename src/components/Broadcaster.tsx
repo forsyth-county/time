@@ -116,7 +116,7 @@ export function Broadcaster() {
   };
 
   const handleCaptchaVerify = (token: string) => {
-    console.debug("[Broadcaster] hCaptcha verified, token:", token.substring(0, 20) + "...");
+    console.debug("[Broadcaster] hCaptcha verified successfully");
     setCaptchaToken(token);
     toast({ title: "Verification Complete", description: "You can now start the call", variant: "success" });
   };
