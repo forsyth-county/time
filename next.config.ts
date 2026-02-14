@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.hcaptcha.com https://*.hcaptcha.com; connect-src 'self' https://forsythtime.onrender.com wss://forsythtime.onrender.com https://*.onrender.com wss://*.onrender.com https://*.vercel.app wss://*.vercel.app ws://localhost:* http://localhost:* https://*.hcaptcha.com; style-src 'self' 'unsafe-inline' https://*.hcaptcha.com; img-src 'self' data: blob: https://*.hcaptcha.com; media-src 'self' blob:; frame-src https://*.hcaptcha.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.hcaptcha.com https://*.hcaptcha.com; connect-src 'self' https://forsythtime.onrender.com wss://forsythtime.onrender.com https://*.onrender.com wss://*.onrender.com https://*.vercel.app wss://*.vercel.app ws://localhost:* http://localhost:* https://*.hcaptcha.com https://*.ably.io wss://*.ably.io https://*.supabase.co; style-src 'self' 'unsafe-inline' https://*.hcaptcha.com; img-src 'self' data: blob: https://*.hcaptcha.com; media-src 'self' blob:; frame-src https://*.hcaptcha.com;",
           },
         ],
       },

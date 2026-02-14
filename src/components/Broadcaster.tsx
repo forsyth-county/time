@@ -284,6 +284,7 @@ export function Broadcaster() {
                 onVerify={handleCaptchaVerify}
                 onExpire={handleCaptchaExpire}
                 onError={handleCaptchaError}
+                theme="dark"
               />
             </div>
             <Button 
