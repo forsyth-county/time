@@ -7,6 +7,7 @@ A modern Next.js web application that enables a mobile phone to live-stream its 
 - **WebRTC Streaming** – Low-latency video + audio streaming via PeerJS
 - **Mobile Broadcaster** – Uses the phone's rear camera with controls for mute, switch camera, and fullscreen
 - **Desktop Viewer** – Connect with a Peer ID to view the live stream
+- **Bot Protection** – hCaptcha verification required before starting a call
 - **QR Code** – Auto-generated QR code for easy ID sharing
 - **Glassmorphism UI** – Frosted glass cards with animated grid background
 - **Framer Motion** – Smooth animations and transitions throughout
@@ -32,6 +33,20 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and configure:
+
+```bash
+# Socket.IO signaling server URL
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+
+# hCaptcha site key (get from https://www.hcaptcha.com/)
+NEXT_PUBLIC_HCAPTCHA_SITE_KEY=your-hcaptcha-site-key-here
+```
+
+The hCaptcha site key is required for bot protection on the "Start Call" screen. Get your free site key from [hCaptcha](https://www.hcaptcha.com/).
 
 ### Usage
 
