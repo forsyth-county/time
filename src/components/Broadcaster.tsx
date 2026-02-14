@@ -256,7 +256,7 @@ export function Broadcaster() {
               onClick={handleStartCamera} 
               className="gap-2" 
               size="lg"
-              disabled={!!hCaptchaSiteKey && !captchaToken}
+              disabled={Boolean(hCaptchaSiteKey) && !captchaToken}
             >
               <Video className="h-4 w-4" />
               Start Call
