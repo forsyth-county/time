@@ -6,9 +6,9 @@ import { GridBackground } from "@/components/GridBackground";
 import { Broadcaster } from "@/components/Broadcaster";
 import { Viewer } from "@/components/Viewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Radio, Smartphone, Monitor, MessageSquare } from "lucide-react";
+import { Radio, Smartphone, Monitor } from "lucide-react";
 import { isMobileDevice } from "@/lib/utils";
-import { ChatComponent } from "@/components/ChatComponent";
+
 
 export default function Home() {
   const [isClientMounted, setIsClientMounted] = useState(false);
@@ -80,10 +80,6 @@ export default function Home() {
                   <Monitor className="h-4 w-4" />
                   Join Call
                 </TabsTrigger>
-                <TabsTrigger value="chat" className="gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Chat
-                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="broadcaster">
@@ -91,9 +87,6 @@ export default function Home() {
               </TabsContent>
               <TabsContent value="viewer">
                 <Viewer />
-              </TabsContent>
-              <TabsContent value="chat">
-                <ChatComponent />
               </TabsContent>
             </Tabs>
           </motion.div>
