@@ -138,7 +138,42 @@ export function Broadcaster() {
       toast({ title: "Verification Required", description: "Please complete the hCaptcha verification", variant: "destructive" });
       return;
     }
-    console.debug("[Broadcaster] handleStartCamera — starting call with callId:", callId);
+
+    // Verify captcha token with backend
+    try {
+      console.debug("[Broadcaster] Verifying captcha with backend...");
+      const response = await fetch('/time/api/verify-captcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        console.error("[Broadcaster] Captcha verification failed:", result.error);
+        toast({ 
+          title: "Verification Failed", 
+          description: "Captcha verification failed. Please try again.", 
+          variant: "destructive" 
+        });
+        setCaptchaToken(null); // Reset token so user must verify again
+        return;
+      }
+
+      console.debug("[Broadcaster] Captcha verified successfully, starting call with callId:", callId);
+    } catch (error) {
+      console.error("[Broadcaster] Error verifying captcha:", error);
+      toast({ 
+        title: "Verification Error", 
+        description: "Could not verify captcha. Please try again.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
     triggerHaptic([8, 16, 8]);
     setCameraStarted(true);
     await startCall();
